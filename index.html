@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Stokes</title>
 <meta name="description" content="A real-time fluid simulation. The incompressible Navier-Stokes equations solved on the GPU: advection, vorticity confinement and an iterative pressure projection." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
 :root{
   --ink:#f2f3f5; --sub:#9aa0a8; --dim:#5c636b;
   --bg:#05060a; --bar:#0b0d12; --line:#1a1e26;
-  --s:"Instrument Sans",system-ui,sans-serif;
-  --m:"Spline Sans Mono",ui-monospace,Menlo,monospace;
+  --s:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --m:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--s)}
@@ -21,36 +18,37 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 
 .mark{position:fixed;left:26px;top:22px;z-index:5;pointer-events:none}
 .mark b{display:block;font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1}
-.mark span{display:block;font-family:var(--m);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-top:7px}
+.mark span{display:block;font-size:12.5px;color:var(--sub);margin-top:6px}
 .eq{position:fixed;right:26px;top:22px;z-index:5;pointer-events:none;text-align:right;
-  font-family:var(--m);font-size:10.5px;letter-spacing:.06em;color:var(--dim);line-height:1.9}
+  font-family:var(--m);font-size:11px;color:var(--dim);line-height:1.9}
 .eq i{color:var(--sub);font-style:normal}
 
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bar);border-top:1px solid var(--line);
   display:flex;align-items:stretch;flex-wrap:wrap}
-.cell{padding:12px 18px;border-right:1px solid var(--line);min-width:146px;flex:1}
+.cell{padding:12px 14px;border-right:1px solid var(--line);min-width:112px;flex:1}
 .cell:last-child{border-right:0}
-.cell label{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--m);font-size:9.5px;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
-.cell label b{color:var(--ink);font-weight:500;font-size:11px;letter-spacing:0}
+.cell:has(#it){min-width:152px}
+.cell label{white-space:nowrap;gap:10px;display:flex;justify-content:space-between;align-items:baseline;font-size:12px;
+  color:var(--sub);margin-bottom:7px}
+.cell label b{color:var(--ink);font-family:var(--m);font-weight:500;font-size:11px}
 input[type=range]{width:100%;height:14px;background:transparent;accent-color:#fff;margin:0}
 .acts{display:flex;align-items:center;gap:8px;padding:12px 18px;flex:none}
-button{font-family:var(--m);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);
+button{font-family:var(--s);font-size:12.5px;color:var(--sub);
   background:transparent;border:1px solid var(--line);padding:9px 13px;cursor:pointer;border-radius:3px}
 button:hover{color:var(--ink);border-color:#333b46}
 button.on{background:var(--ink);color:#05060a;border-color:var(--ink)}
 .pals{display:flex;gap:6px;padding:12px 18px;align-items:center;border-right:1px solid var(--line);flex:none}
 .pal{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);cursor:pointer;padding:0}
 .pal.on{box-shadow:0 0 0 1px var(--bar),0 0 0 2px var(--ink)}
-.stat{padding:12px 18px;border-right:1px solid var(--line);font-family:var(--m);font-size:10px;color:var(--dim);
-  letter-spacing:.08em;line-height:1.85;flex:none;min-width:132px}
+.stat{padding:12px 18px;border-right:1px solid var(--line);font-family:var(--m);font-size:10.5px;color:var(--dim);
+  line-height:1.85;flex:none;min-width:132px}
 .stat b{color:var(--ink);font-weight:500}
-.hint{position:fixed;left:26px;bottom:104px;z-index:5;font-family:var(--m);font-size:10.5px;color:var(--dim);letter-spacing:.06em;pointer-events:none}
-.credit{position:fixed;right:26px;bottom:104px;z-index:5;font-family:var(--m);font-size:10.5px;color:var(--dim);letter-spacing:.06em}
+.hint{position:fixed;left:26px;bottom:calc(var(--barh,74px) + 16px);z-index:5;font-size:12.5px;color:var(--dim);pointer-events:none}
+.credit{position:fixed;right:26px;bottom:calc(var(--barh,74px) + 16px);z-index:5;font-size:12.5px;color:var(--dim)}
 .credit a{color:var(--sub)}
 .fail{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;
   font-family:var(--m);font-size:13px;color:var(--sub);line-height:1.8}
-@media(max-width:760px){.mark{left:16px;top:14px}.eq{display:none}.hint,.credit{display:none}.cell{min-width:118px;padding:10px 12px}}
+@media(max-width:760px){.mark{left:16px;top:14px}.eq{display:none}.hint{display:none}.credit{right:16px;top:16px;bottom:auto;font-size:11.5px}.cell{min-width:118px;padding:10px 12px}}
 </style>
 </head>
 <body>
@@ -61,8 +59,8 @@ button.on{background:var(--ink);color:#05060a;border-color:var(--ink)}
   <i>∂u/∂t</i> + (u·∇)u = −∇p + ν∇²u<br>
   ∇·u = 0
 </div>
-<div class="hint">drag to push the fluid</div>
-<div class="credit">Built by <a href="https://bxzex.com">bxzex</a> · <a href="https://github.com/bxzex/stokes">Source</a></div>
+<div class="hint">Drag to push the fluid</div>
+<div class="credit">© 2026 <a href="https://bxzex.com">bxzex</a> · <a href="https://github.com/bxzex/stokes">Source</a></div>
 
 <div class="bar">
   <div class="pals" id="pals"></div>
@@ -71,7 +69,7 @@ button.on{background:var(--ink);color:#05060a;border-color:var(--ink)}
   <div class="cell"><label>Vorticity <b id="v-cur">28</b></label><input type="range" id="cur" min="0" max="50" step="1" value="28"></div>
   <div class="cell"><label>Pressure sweeps <b id="v-it">26</b></label><input type="range" id="it" min="4" max="60" step="1" value="26"></div>
   <div class="cell"><label>Splat size <b id="v-rad">0.34</b></label><input type="range" id="rad" min="0.05" max="1" step="0.01" value="0.34"></div>
-  <div class="stat" id="stat">—</div>
+  <div class="stat" id="stat"></div>
   <div class="acts">
     <button id="auto" class="on">Drift</button>
     <button id="clear">Clear</button>
@@ -81,6 +79,8 @@ button.on{background:var(--ink);color:#05060a;border-color:var(--ink)}
 
 <script>
 const $ = id => document.getElementById(id);
+// the control bar wraps on narrow windows, so the lines above it follow its height
+new ResizeObserver(e => document.documentElement.style.setProperty("--barh", e[0].target.offsetHeight + "px")).observe(document.querySelector(".bar"));
 const canvas = $("c");
 const gl = canvas.getContext("webgl2", { alpha:false, depth:false, stencil:false, antialias:false, preserveDrawingBuffer:true });
 
